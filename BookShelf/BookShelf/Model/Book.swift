@@ -13,6 +13,7 @@ struct Book: Identifiable {
     var author: String
     var isbn: String /// 도서관리 번호
     var pages: Int
+    var isRead: Bool = false
 }
 
 extension Book {
