@@ -8,7 +8,7 @@
 import SwiftUI
 import Combine
 
-///
+/// 문자열에서 대소문자를 구분하지 않고 특정 검색어가 포함되어 있는지를 확인
 private extension String {
     func matches(_ searchTerm: String) -> Bool {
         self.range(of: searchTerm, options: .caseInsensitive) != nil
@@ -55,7 +55,7 @@ struct BooksListView: View {
         }
         /// 서치바
         .searchable(text: $viewModel.searchTerm)
-        .textInputAutocapitalization(.none) ///
+        .textInputAutocapitalization(.none) /// 자동 대문자화 설정
         /// 당겨서 화면 새로고침
         .refreshable {
             await viewModel.fetchData()
