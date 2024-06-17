@@ -17,8 +17,10 @@ struct BookListView: View {
     
     var body: some View {
         NavigationStack {
-            List(booksViewModel.books) { book in
-                BookRowView(book: book)
+            List($booksViewModel.books) { $book in
+                NavigationLink(destination: BookDetailView(book: $book)) {
+                    BookRowView(book: book)
+                }
             }
             .listStyle(.plain)
             .navigationTitle("Books")
