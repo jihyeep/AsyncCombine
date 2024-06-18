@@ -33,35 +33,59 @@ class BookEditViewModel: ObservableObject {
 }
 
 struct BookEditView: View {
+    @Binding var book: Book
+    
+    @Environment(\.dismiss) var dismiss
     @ObservedObject var bookEditViewModel: BookEditViewModel
     
-    init(book: Book) {
-        self.bookEditViewModel = BookEditViewModel(book: book)
+    init(book: Binding<Book>) {
+        self._book = book
+        self.bookEditViewModel = BookEditViewModel(book: book.wrappedValue)
+    }
+    
+    func cancel() {
+        dismiss()
+    }
+    
+    func save() {
+        self.book = bookEditViewModel.book
+        dismiss()
     }
     
     var body: some View {
-        Form {
-            TextField("Book title", text: $bookEditViewModel.book.title)
-            Image(bookEditViewModel.book.largeCoverImageName)
-            TextField("Author", text: $bookEditViewModel.book.author)
-            VStack(alignment: .leading) {
-                if !bookEditViewModel.isISBNValid {
-                    Text("ISBN is invalid")
-                        .font(.caption)
-                        .foregroundStyle(.red)
+        NavigationStack {
+            Form {
+                TextField("Book title", text: $bookEditViewModel.book.title)
+                Image(bookEditViewModel.book.largeCoverImageName)
+                TextField("Author", text: $bookEditViewModel.book.author)
+                VStack(alignment: .leading) {
+                    if !bookEditViewModel.isISBNValid {
+                        Text("ISBN is invalid")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                    TextField("ISBN", text: $bookEditViewModel.book.isbn)
                 }
-                TextField("ISBN", text: $bookEditViewModel.book.isbn)
+                TextField("Pages", value: $bookEditViewModel.book.pages, formatter: NumberFormatter())
+                Toggle("Read", isOn: $bookEditViewModel.book.isRead)
             }
-            TextField("Pages", value: $bookEditViewModel.book.pages, formatter: NumberFormatter())
-            Toggle("Read", isOn: $bookEditViewModel.book.isRead)
-        }
-        .onChange(of: bookEditViewModel.book.isbn) {
-            print("TEST \(bookEditViewModel.isISBNValid)")
-            print("isbn: \(bookEditViewModel.book.isbn)")
+            .navigationTitle(bookEditViewModel.book.title)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: cancel) {
+                        Text("Cancel")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: save) {
+                        Text("Save")
+                    }
+                }
+            }
         }
     }
 }
 
 #Preview {
-    BookEditView(book: Book.sampleBooks[0])
+    BookEditView(book: .constant(Book.sampleBooks[0]))
 }
