@@ -9,6 +9,7 @@ let pizzaOrderPublisher = NotificationCenter.default.publisher(for: .didUpdateOr
 
 // sink, map은 비동기적으로 일어남
 pizzaOrderPublisher.sink { Notification in
+    /// 비동기 확인
     Task {
         try? await Task.sleep(for: .seconds(2))
     }
