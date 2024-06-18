@@ -4,5 +4,6 @@
         <page name='SimplePublisher'/>
         <page name='PizzaOrdering'/>
         <page name='PizzaOrdering2'/>
+        <page name='PizzaOrdering3'/>
     </pages>
 </playground>
