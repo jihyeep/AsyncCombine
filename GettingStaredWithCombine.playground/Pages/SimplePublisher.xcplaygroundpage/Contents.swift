@@ -15,3 +15,7 @@ Just(42)
 Just("Combine")
     .sink { value in
         print("Hello, \(value)")}
+
+// 숫자
+123.words.publisher.sink { print($0) }
+123.description.publisher.sink { print($0) }
