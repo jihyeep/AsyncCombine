@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 class SignUpFormViewModel: ObservableObject {
     @Published var username: String = ""
@@ -16,10 +17,15 @@ class SignUpFormViewModel: ObservableObject {
     @Published var passwordMessage: String = ""
     @Published var isValid: Bool = false
     
+    // Bool 타입, 에러는 Never
+    private lazy var isUsesrnameLengthValidPublisher: AnyPublisher<Bool, Never> = {
+        $username.map { $0.count >= 3 }.eraseToAnyPublisher()
+    }()
+    
     init() {
-        $username.map { $0.count >= 3 }
-            .assign(to: &$isValid)
-        $username.map { $0.count >= 3 ? "" : "Username must be at least three characters!"}
+        // Combine을 사용하여 구독 형태로 변환
+        isUsesrnameLengthValidPublisher.assign(to: &$isValid)
+        isUsesrnameLengthValidPublisher.map { $0 ? "" : "Username must be at least three characters!"}
             .assign(to: &$usernameMessage)
     }
 }
