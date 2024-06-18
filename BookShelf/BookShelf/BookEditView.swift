@@ -23,12 +23,14 @@ func checkISBN(isbn: String) -> Bool {
 
 class BookEditViewModel: ObservableObject {
     @Published var book: Book
-    var isISBNValid: Bool {
-        checkISBN(isbn: book.isbn)
-    }
+    @Published var isISBNValid: Bool = false
     
     init(book: Book) {
         self.book = book
+        self.$book.map { book in
+            return checkISBN(isbn: book.isbn)
+        }
+        .assign(to: &$isISBNValid)
     }
 }
 
