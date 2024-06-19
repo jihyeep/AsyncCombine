@@ -23,21 +23,15 @@ enum NetworkError: Error {
 
 class AuthenticationService {
     // MARK: - Combine
-    func checkUserNameAvailableNaive(userName: String) -> AnyPublisher<Bool, Never> {
+    func checkUserNameAvailable(userName: String) -> AnyPublisher<Bool, Never> {
         guard let url = URL(string: "http://127.0.0.1:8080/isUserNameAvailable?userName=\(userName)") else {
             return Just(false).eraseToAnyPublisher()
         }
         
         return URLSession.shared.dataTaskPublisher(for: url)
-            .map { data, response in
-                do {
-                    let decoder = JSONDecoder()
-                    let userAvailableMessage = try decoder.decode(UserNameAvailableMessage.self, from: data)
-                    return userAvailableMessage.isAvailable
-                } catch {
-                    return false
-                }
-            }
+            .map(\.data)
+            .decode(type: UserNameAvailableMessage.self, decoder: JSONDecoder())
+            .map(\.isAvailable)
             // error는 never이므로
             /// error가 난다면 false로 그냥 return 해라
             .replaceError(with: false)

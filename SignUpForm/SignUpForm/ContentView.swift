@@ -17,8 +17,6 @@ class SignUpFormViewModel: ObservableObject {
     @Published var passwordMessage: String = ""
     @Published var isValid: Bool = false
     
-//    @Published var isUserNameAvailable: Bool = false
-    
     private let authenticationService = AuthenticationService()
     
     // 구독을 취소할 수 있는 객체들을 저장하기 위해 사용
@@ -61,32 +59,13 @@ class SignUpFormViewModel: ObservableObject {
                 // 중첩 배열(이중 배열)을 flat하게 만들 때사용
                 /// Combine에서는 게시자를 publisher 객체로 만들어줄 수 있음
                 .flatMap { username -> AnyPublisher<Bool, Never> in
-                    self.authenticationService.checkUserNameAvailableNaive(userName: username)
+                    self.authenticationService.checkUserNameAvailable(userName: username)
                 }
                 .receive(on: DispatchQueue.main)
-                .share()
+                .share() // 다른 subscriber에서 이 publisher를 공유
                 .print("share")
                 .eraseToAnyPublisher()
-            
-    //            .sink { [weak self] userName in
-    //                self?.checkUserNameAvailable(userName)
-    //            }
-    //            .store(in: &cancellables)
     }()
-    
-//    func checkUserNameAvailable(_ userName: String) {
-//        authenticationService.checkUserNameAvailableWithClosure(userName: userName) { [weak self] result in
-//            DispatchQueue.main.async {
-//                switch result {
-//                case .success(let isAvailable):
-//                    self?.isUserNameAvailable = isAvailable
-//                case .failure(let error):
-//                    print("error: \(error)")
-//                    self?.isUserNameAvailable = false
-//                }
-//            }
-//        }
-//    }
     
     init() {
         // Combine을 사용하여 구독 형태로 변환
@@ -102,8 +81,6 @@ class SignUpFormViewModel: ObservableObject {
                 return ""
             }
             .assign(to: &$usernameMessage)
-//        isUsesrnameLengthValidPublisher.map { $0 ? "" : "Username must be at least three characters!"}
-//            .assign(to: &$usernameMessage)
         
         Publishers.CombineLatest(isPasswordEmptyPublisher, isPasswordMatchingPublisher)
             .map { isPasswordEmpty, isPasswordMatching in
