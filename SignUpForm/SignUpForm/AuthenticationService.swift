@@ -21,20 +21,21 @@ enum NetworkError: Error {
   case encodingError(Error)
 }
 
+enum APIError: LocalizedError {
+    case invalidRequestError(String)
+}
+
 class AuthenticationService {
     // MARK: - Combine
-    func checkUserNameAvailable(userName: String) -> AnyPublisher<Bool, Never> {
+    func checkUserNameAvailable(userName: String) -> AnyPublisher<Bool, Error> {
         guard let url = URL(string: "http://127.0.0.1:8080/isUserNameAvailable?userName=\(userName)") else {
-            return Just(false).eraseToAnyPublisher()
+            return Fail(error: APIError.invalidRequestError("URL invalid")).eraseToAnyPublisher()
         }
         
         return URLSession.shared.dataTaskPublisher(for: url)
             .map(\.data)
             .decode(type: UserNameAvailableMessage.self, decoder: JSONDecoder())
             .map(\.isAvailable)
-            // error는 never이므로
-            /// error가 난다면 false로 그냥 return 해라
-            .replaceError(with: false)
             .eraseToAnyPublisher()
     }
     

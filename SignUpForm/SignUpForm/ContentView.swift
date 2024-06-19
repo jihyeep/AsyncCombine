@@ -60,6 +60,10 @@ class SignUpFormViewModel: ObservableObject {
                 /// Combine에서는 게시자를 publisher 객체로 만들어줄 수 있음
                 .flatMap { username -> AnyPublisher<Bool, Never> in
                     self.authenticationService.checkUserNameAvailable(userName: username)
+                        .catch { error in
+                            return Just(false)
+                        }
+                        .eraseToAnyPublisher()
                 }
                 .receive(on: DispatchQueue.main)
                 .share() // 다른 subscriber에서 이 publisher를 공유
