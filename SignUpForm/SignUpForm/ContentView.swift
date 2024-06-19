@@ -17,7 +17,7 @@ class SignUpFormViewModel: ObservableObject {
     @Published var passwordMessage: String = ""
     @Published var isValid: Bool = false
     
-    @Published var isUserNameAvailable: Bool = false
+//    @Published var isUserNameAvailable: Bool = false
     
     private let authenticationService = AuthenticationService()
     
@@ -48,38 +48,51 @@ class SignUpFormViewModel: ObservableObject {
     
     private lazy var isFormValidPublisher: AnyPublisher<Bool, Never> = {
         // 스트림 3개 합성
-        Publishers.CombineLatest3(isUsernameLengthValidPublisher, $isUserNameAvailable, isPasswordValidPublisher)
+        Publishers.CombineLatest3(isUsernameLengthValidPublisher, isUsernameAvailablePublisher, isPasswordValidPublisher)
             .map { $0 && $1 && $2 }
             .eraseToAnyPublisher()
     }()
     
-    func checkUserNameAvailable(_ userName: String) {
-        authenticationService.checkUserNameAvailableWithClosure(userName: userName) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let isAvailable):
-                    self?.isUserNameAvailable = isAvailable
-                case .failure(let error):
-                    print("error: \(error)")
-                    self?.isUserNameAvailable = false
+    private lazy var isUsernameAvailablePublisher: AnyPublisher<Bool, Never> = {
+            $username
+                // 0.5초 후에 검증
+                .debounce(for: 0.5, scheduler: RunLoop.main)
+                .removeDuplicates()
+                // 중첩 배열(이중 배열)을 flat하게 만들 때사용
+                /// Combine에서는 게시자를 publisher 객체로 만들어줄 수 있음
+                .flatMap { username -> AnyPublisher<Bool, Never> in
+                    self.authenticationService.checkUserNameAvailableNaive(userName: username)
                 }
-            }
-        }
-    }
+                .receive(on: DispatchQueue.main)
+                .share()
+                .print("share")
+                .eraseToAnyPublisher()
+            
+    //            .sink { [weak self] userName in
+    //                self?.checkUserNameAvailable(userName)
+    //            }
+    //            .store(in: &cancellables)
+    }()
+    
+//    func checkUserNameAvailable(_ userName: String) {
+//        authenticationService.checkUserNameAvailableWithClosure(userName: userName) { [weak self] result in
+//            DispatchQueue.main.async {
+//                switch result {
+//                case .success(let isAvailable):
+//                    self?.isUserNameAvailable = isAvailable
+//                case .failure(let error):
+//                    print("error: \(error)")
+//                    self?.isUserNameAvailable = false
+//                }
+//            }
+//        }
+//    }
     
     init() {
-        $username
-            // 0.5초 후에 검증
-            .debounce(for: 0.5, scheduler: DispatchQueue.main)
-            .sink { [weak self] userName in
-                self?.checkUserNameAvailable(userName)
-            }
-            .store(in: &cancellables)
-        
         // Combine을 사용하여 구독 형태로 변환
         isFormValidPublisher.assign(to: &$isValid)
         
-        Publishers.CombineLatest(isUsernameLengthValidPublisher, $isUserNameAvailable)
+        Publishers.CombineLatest(isUsernameLengthValidPublisher, isUsernameAvailablePublisher)
             .map { isUsernameLengthValid, isUserNameAvailable in
                 if !isUsernameLengthValid {
                     return "Username must be at least three characters!"
@@ -113,7 +126,7 @@ struct ContentView: View {
             // username
             Section {
                 TextField("Username", text: $viewModel.username)
-                    // 대문자 X
+                    // 첫 글자 대문자 변환 비활성화
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
             } footer: {
