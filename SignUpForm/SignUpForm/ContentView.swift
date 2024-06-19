@@ -25,7 +25,7 @@ class SignUpFormViewModel: ObservableObject {
     /// 비동기 작업이 완료되기 전에 취소하고자 할 때 사용
     private var cancellables: Set<AnyCancellable> = []
     
-    private lazy var isUsesrnameLengthValidPublisher: AnyPublisher<Bool, Never> = { // Bool 타입, 에러는 Never
+    private lazy var isUsernameLengthValidPublisher: AnyPublisher<Bool, Never> = { // Bool 타입, 에러는 Never
         $username.map { $0.count >= 3 }.eraseToAnyPublisher()
     }()
     
@@ -47,8 +47,9 @@ class SignUpFormViewModel: ObservableObject {
     }()
     
     private lazy var isFormValidPublisher: AnyPublisher<Bool, Never> = {
-        Publishers.CombineLatest(isUsesrnameLengthValidPublisher, isPasswordValidPublisher)
-            .map { $0 && $1 }
+        // 스트림 3개 합성
+        Publishers.CombineLatest3(isUsernameLengthValidPublisher, $isUserNameAvailable, isPasswordValidPublisher)
+            .map { $0 && $1 && $2 }
             .eraseToAnyPublisher()
     }()
     
@@ -77,8 +78,19 @@ class SignUpFormViewModel: ObservableObject {
         
         // Combine을 사용하여 구독 형태로 변환
         isFormValidPublisher.assign(to: &$isValid)
-        isUsesrnameLengthValidPublisher.map { $0 ? "" : "Username must be at least three characters!"}
+        
+        Publishers.CombineLatest(isUsernameLengthValidPublisher, $isUserNameAvailable)
+            .map { isUsernameLengthValid, isUserNameAvailable in
+                if !isUsernameLengthValid {
+                    return "Username must be at least three characters!"
+                } else if !isUserNameAvailable {
+                    return "This username is already taken."
+                }
+                return ""
+            }
             .assign(to: &$usernameMessage)
+//        isUsesrnameLengthValidPublisher.map { $0 ? "" : "Username must be at least three characters!"}
+//            .assign(to: &$usernameMessage)
         
         Publishers.CombineLatest(isPasswordEmptyPublisher, isPasswordMatchingPublisher)
             .map { isPasswordEmpty, isPasswordMatching in
@@ -101,7 +113,8 @@ struct ContentView: View {
             // username
             Section {
                 TextField("Username", text: $viewModel.username)
-                    .textInputAutocapitalization(.none)
+                    // 대문자 X
+                    .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
             } footer: {
                 Text(viewModel.usernameMessage)
