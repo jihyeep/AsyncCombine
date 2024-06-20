@@ -14,7 +14,7 @@ class SignUpFormViewModel: ObservableObject {
     @Published var username: String = ""
     @Published var usernameMessage: String = ""
     @Published var isValid: Bool = false
-    @Published var showUpdateDialog: Bool = false
+    @Published var showUpdateDialog: Bool = true
     
     private var authenticationService = AuthenticationService()
     
@@ -32,7 +32,7 @@ class SignUpFormViewModel: ObservableObject {
             }
             .receive(on: DispatchQueue.main)
             .print("before share")
-            .share()
+            .share() /// stream 공유
             .print("share")
             .eraseToAnyPublisher()
     }()
