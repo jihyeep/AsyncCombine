@@ -46,20 +46,7 @@ struct AuthenticationService {
             }
         return dataTaskPublisher
             // Retry(재시도)
-            .tryCatch { error -> AnyPublisher<(data: Data, response: URLResponse), Error> in
-                if case APIError.serverError = error {
-                    return Just(Void())
-                        .delay(for: 3, scheduler: DispatchQueue.global())
-                        // 새로운 stream을 만듦
-                        .flatMap { _ in
-                            return dataTaskPublisher
-                        }
-                        .print("before retry")
-                        .retry(10)
-                        .eraseToAnyPublisher()
-                }
-                throw error
-            }
+            .retry(10, withDelay: 3)
             .map(\.data) /// publisher
             // Decode error 처리
             .tryMap { data -> UserNameAvailableMessage in
