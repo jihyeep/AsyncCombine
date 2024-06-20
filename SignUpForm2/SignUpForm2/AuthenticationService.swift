@@ -16,6 +16,7 @@ struct AuthenticationService {
             return Fail(error: APIError.invalidRequestError("URL invalid"))
                 .eraseToAnyPublisher()
         }
+        // 아래 stream에서 error가 날 경우, retry할 코드를 추가하기 위해 변수에 넣어줌
         let dataTaskPublisher = URLSession.shared.dataTaskPublisher(for: url)
             .mapError { error -> Error in
                 return APIError.transportError(error)
@@ -43,10 +44,33 @@ struct AuthenticationService {
                 }
                 return (data, response)
             }
-            return dataTaskPublisher
-                .map(\.data) /// publisher
-                .decode(type: UserNameAvailableMessage.self, decoder: JSONDecoder())
-                .map(\.isAvailable)
-                .eraseToAnyPublisher()
+        return dataTaskPublisher
+            // Retry(재시도)
+            .tryCatch { error -> AnyPublisher<(data: Data, response: URLResponse), Error> in
+                if case APIError.serverError = error {
+                    return Just(Void())
+                        .delay(for: 3, scheduler: DispatchQueue.global())
+                        // 새로운 stream을 만듦
+                        .flatMap { _ in
+                            return dataTaskPublisher
+                        }
+                        .print("before retry")
+                        .retry(10)
+                        .eraseToAnyPublisher()
+                }
+                throw error
+            }
+            .map(\.data) /// publisher
+            // Decode error 처리
+            .tryMap { data -> UserNameAvailableMessage in
+                let decoder = JSONDecoder()
+                do {
+                    return try decoder.decode(UserNameAvailableMessage.self, from: data)
+                } catch {
+                    throw APIError.decodingError(error)
+                }
+            }
+            .map(\.isAvailable)
+            .eraseToAnyPublisher()
     }
 }
