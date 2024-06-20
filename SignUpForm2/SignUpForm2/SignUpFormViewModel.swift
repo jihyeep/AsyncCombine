@@ -34,6 +34,7 @@ class SignUpFormViewModel: ObservableObject {
             .print("before share")
             .share() /// stream 공유
             .print("share")
+            .dump() /// 원래 있던 dump 함수를 실행 흐름 중간에 써서 흐름을 눈으로 보기 위함
             .eraseToAnyPublisher()
     }()
     
