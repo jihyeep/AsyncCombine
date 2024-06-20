@@ -48,5 +48,16 @@ class SignUpFormViewModel: ObservableObject {
             }
         }
         .assign(to: &$isValid)
+        
+        isUsernameAvailablePublisher.map { result in
+            switch result {
+            case .success(let isAvailable):
+                return isAvailable ? "" : "This username is not available"
+            // Error message
+            case .failure(let error):
+                return error.localizedDescription
+            }
+        }
+        .assign(to: &$usernameMessage)
     }
 }
