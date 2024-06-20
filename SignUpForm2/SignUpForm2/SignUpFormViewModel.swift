@@ -18,7 +18,7 @@ class SignUpFormViewModel: ObservableObject {
     
     private var authenticationService = AuthenticationService()
     
-    // Stream(publisher)
+    // Stream2(publisher)
     private lazy var isUsernameAvailablePublisher: AnyPublisher<Available, Never> = {
         $username
             .debounce(for: 0.5, scheduler: RunLoop.main) /// 속도 조절
@@ -27,9 +27,26 @@ class SignUpFormViewModel: ObservableObject {
             .flatMap { username -> AnyPublisher<Available, Never> in
                 self.authenticationService.checkUserNameAvailablePublisher(userName: username)
                     // Stream에 들어가서 Result 타입으로 감싸서 값을 보냄
+                    /// 오류 흐름이 사라짐
                     .asResult()
             }
+            .receive(on: DispatchQueue.main)
+            .print("before share")
             .share()
+            .print("share")
             .eraseToAnyPublisher()
     }()
+    
+    init() {
+        isUsernameAvailablePublisher.map { result in
+            switch result {
+            case .success(let isAvailable):
+                return isAvailable
+//            case .failure(let error):
+            case .failure(_):
+                return false
+            }
+        }
+        .assign(to: &$isValid)
+    }
 }
