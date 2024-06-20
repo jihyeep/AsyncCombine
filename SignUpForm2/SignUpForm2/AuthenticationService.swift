@@ -46,7 +46,12 @@ struct AuthenticationService {
             }
         return dataTaskPublisher
             // Retry(재시도)
-            .retry(10, withDelay: 3)
+            .retry(10, withDelay: 3) { error in
+                if case APIError.serverError = error {
+                    return true
+                }
+                return false
+            }
             .map(\.data) /// publisher
             // Decode error 처리
             .tryMap { data -> UserNameAvailableMessage in
