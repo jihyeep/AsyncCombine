@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<playground version='5.0' target-platform='ios' buildActiveScheme='true' importAppTypes='true'>
-    <timeline fileName='timeline.xctimeline'/>
+<playground version='6.0' target-platform='ios' buildActiveScheme='true' importAppTypes='true'>
+    <pages>
+        <page name='Synchronous Programming'/>
+        <page name='Completion Handler'/>
+        <page name='Asynchronous Programming with async-await'/>
+        <page name='Asynchronous Programming with Completion Handler'/>
+    </pages>
 </playground>
