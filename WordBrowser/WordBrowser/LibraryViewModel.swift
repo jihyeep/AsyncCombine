@@ -60,6 +60,7 @@ class LibraryViewModel: ObservableObject {
             
             print("\(#function) is on main thread: \(Thread.isMainThread)")
             return word
+            
         } catch {
             return Word.empty
         }

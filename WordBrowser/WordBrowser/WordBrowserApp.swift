@@ -11,7 +11,9 @@ import SwiftUI
 struct WordBrowserApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationStack {
+                ContentView()
+            }
         }
     }
 }
