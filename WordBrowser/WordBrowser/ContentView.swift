@@ -43,7 +43,11 @@ struct ContentView: View {
         .textInputAutocapitalization(.never)
         .navigationTitle("Library")
         .refreshable {
+            print("\(#function) is on main thread BEFORE await: \(Thread.isMainThread)")
+            
             await viewModel.refresh()
+            
+            print("\(#function) is on main thread AFTER await: \(Thread.isMainThread)")
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
