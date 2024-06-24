@@ -5,5 +5,6 @@
         <page name='Completion Handler'/>
         <page name='Asynchronous Programming with async-await'/>
         <page name='Asynchronous Programming with Completion Handler'/>
+        <page name='AsyncAwait'/>
     </pages>
 </playground>
