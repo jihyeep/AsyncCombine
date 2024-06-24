@@ -42,6 +42,11 @@ extension Definition: Identifiable {
     var id: String { self.definition }
 }
 
+// MARK: - Error
+enum WordsAPIError: Error {
+  case invalidServerResponse
+}
+
 // MARK: - API Keys
 struct WordsAPISecrets {
     static let apiKeyHeader = "x-rapidapi-key"
