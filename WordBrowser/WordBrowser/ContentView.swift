@@ -22,7 +22,8 @@ struct SectionView: View {
                 Text("(No items match your filter criteria)")
             } else {
                 ForEach(words, id: \.self) { word in
-                    Text(word)}
+                    Text(word)
+                }
             }
         }
     }
@@ -30,6 +31,7 @@ struct SectionView: View {
 
 struct ContentView: View {
     @StateObject var viewModel = LibraryViewModel()
+    @State var isAddNewWordDialogPresented = false
     
     var body: some View {
         List {
@@ -42,9 +44,16 @@ struct ContentView: View {
         .navigationTitle("Library")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(action: {}) {
+                Button(action: {
+                    isAddNewWordDialogPresented.toggle()
+                }) {
                     Image(systemName: "plus")
                 }
+            }
+        }
+        .sheet(isPresented: $isAddNewWordDialogPresented) {
+            NavigationStack {
+                AddWordView()
             }
         }
     }

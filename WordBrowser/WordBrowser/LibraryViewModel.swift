@@ -12,6 +12,7 @@ class LibraryViewModel: ObservableObject {
     @Published var randomWord = "partially"
     @Published var tips: [String] = ["Swift", "authentication", "authorization"]
     @Published var favorites: [String] = ["stunning", "brilliant", "marvelous"]
+    // searchable
     @Published var filteredTips = [String]()
     @Published var filteredFavorites = [String]()
 }
