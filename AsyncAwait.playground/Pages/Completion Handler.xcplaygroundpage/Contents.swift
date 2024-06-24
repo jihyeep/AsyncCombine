@@ -1,6 +1,7 @@
 import Foundation
 import PlaygroundSupport
 
+// Playground는 명시적으로 종료될 때까지 계속 실행됨 - 비동기 작업이 완료될 때까지 Playground가 계속 실행
 PlaygroundPage.current.needsIndefiniteExecution = true
 
 public func customerSays(_ message: String) {
