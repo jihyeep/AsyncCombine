@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 class LibraryViewModel: ObservableObject {
     @Published var searchText = ""
@@ -15,4 +16,24 @@ class LibraryViewModel: ObservableObject {
     // searchable
     @Published var filteredTips = [String]()
     @Published var filteredFavorites = [String]()
+    
+    init() {
+        Publishers.CombineLatest($searchText, $tips).map { query, items in
+            items.filter { item in
+                query.isEmpty ? true : item.contains(query)
+            }
+        }
+        .assign(to: &$filteredTips)
+        
+        Publishers.CombineLatest($searchText, $favorites).map { query, items in
+            items.filter { item in
+                query.isEmpty ? true : item.contains(query)
+            }
+        }
+        .assign(to: &$filteredFavorites)
+    }
+    
+    func addFavorite(_ word: String) {
+        favorites.append(word)
+    }
 }
