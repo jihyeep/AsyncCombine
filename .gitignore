@@ -146,3 +146,6 @@ xcuserdata
 
 ### Secret ###
 *.xcconfig
+
+### 특정 폴더 추적하지 않음 ###
+/CombiningAsync/
